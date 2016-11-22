@@ -18,13 +18,13 @@
 class SerialHardware: public Printer
 {
 	private:
+
 		USART_TypeDef *USARTx;
     char buff[BUFFSIZE];
-		uint8_t interBuff;
-		uint8_t RxIndex;
-    uint8_t dataComplete;
+    uint8_t head;
+    uint8_t tail;
 		char endCode;
-
+    uint8_t ITStatus;
 	public:
 		//uint8_t RxIndex = 0;
 		void WriteByte(const char);
@@ -35,8 +35,6 @@ class SerialHardware: public Printer
 		void Init(uint32_t);
 		void EnableIT(IRQn_Type, uint16_t, FunctionalState);
 		void receiveByteIT();
-		void sendByteIT();
-		void getData(char*);
 		void setEndCode(char);
 
     void println(char);
@@ -57,11 +55,11 @@ class SerialHardware: public Printer
 			WriteByte('\r');
 		}
 
-		uint8_t ReadByte();
-//		uint8_t hasData()
-//		{
-//			return buffIndex;
-//		}
+    uint8_t readByte();
+    uint8_t hasData()
+    {
+      return (head != tail);
+    }
 
 };
 

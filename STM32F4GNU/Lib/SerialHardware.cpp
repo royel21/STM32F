@@ -10,9 +10,10 @@
 SerialHardware::SerialHardware(USART_TypeDef *USARTy, GPIO_TypeDef *port, uint16_t pins,
     uint8_t AF_pin)
 {
+  ITStatus = 0;
 	endCode = 0x00;
-	RxIndex = 0;
-	interBuff = 0;
+  head = 0;
+  tail = 0;
 //	buffIndex = 0;
 	USARTx = USARTy;
 //	userBuff = 1;
@@ -53,6 +54,7 @@ void SerialHardware::setEndCode(char code)
 void SerialHardware::EnableIT(IRQn_Type usart, uint16_t it,
 		FunctionalState state)
 {
+  ITStatus = 1;
   //USARTx->
   USARTx->CR1 |= it;
 	IT_Init(usart, 0, 0, state);
@@ -77,30 +79,35 @@ void SerialHardware::WriteByte(const char byte)
 	USARTx->DR = byte;
 }
 
-void SerialHardware::getData(char* data)
+
+uint8_t SerialHardware::readByte()
 {
-//	for (int i = 0; i < buffIndex; i++)
-//		data[i] = buff[userBuff][i];
-//	buffIndex = 0;
-}
-uint8_t SerialHardware::ReadByte()
-{
+  if (!ITStatus)
+  {
 	while (!(USARTx->SR & USART_FLAG_RXNE))
 		;
 	return (USARTx->DR & 0xFF);
-}
-void SerialHardware::sendByteIT()
-{
+  } else
+  {
+    if (head == tail)
+      return 255;
 
+    uint8_t ch = buff[tail];
+    tail = (tail + 1) % BUFFSIZE;
+
+    return ch;
+  }
 }
+
 void SerialHardware::receiveByteIT()
 {
 	uint8_t ch = (USARTx->DR & 0xFF);
-  if (ch == endCode)
-	{
-    dataComplete++;
+  uint8_t next = (head + 1) % BUFFSIZE;
+  if (head != tail)
+  {
+    buff[next] = ch;
+    head = next;
   }
-  buff[RxIndex++] = ch;
 }
 void SerialHardware::println(char var)
 {
