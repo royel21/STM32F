@@ -16,7 +16,7 @@
 class Printer {
 
 	public:
-		virtual void WriteByte(const char);
+    virtual void WriteByte(const char);
 		void print(char);
 		void print(int, uint8_t = DEC);
 		void print(int32_t, uint8_t = DEC);

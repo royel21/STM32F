@@ -56,7 +56,7 @@ void SerialHardware::EnableIT(IRQn_Type usart, uint16_t it,
 {
   ITStatus = 1;
   //USARTx->
-  USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE);
+  USARTx->CR1 |= USART_CR1_RXNEIE;
   NVIC_InitTypeDef NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel = it;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
@@ -74,7 +74,7 @@ void SerialHardware::Init(uint32_t brr)
 	tUSART.USART_Parity = USART_Parity_No;
 	tUSART.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	tUSART.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-	USART_Init(USARTx, &tUSART);
+  USART_Init(USARTx, &tUSART);
 	USARTx->CR1 |= USART_CR1_UE; // USART ENABLE
 }
 

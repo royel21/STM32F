@@ -17,25 +17,22 @@
 
 class SerialHardware: public Printer
 {
-	private:
+  private:
 
-		USART_TypeDef *USARTx;
+    USART_TypeDef *USARTx;
     char buff[BUFFSIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
-		char endCode;
+    char endCode;
     uint8_t ITStatus;
   public:
-		//uint8_t RxIndex = 0;
-		void WriteByte(const char);
+    SerialHardware(USART_TypeDef *, GPIO_TypeDef *, uint16_t, uint8_t);
 
-    SerialHardware(USART_TypeDef *, GPIO_TypeDef *, uint16_t,
-				uint8_t);
-
-		void Init(uint32_t);
-		void EnableIT(IRQn_Type, uint16_t, FunctionalState);
-		void receiveByteIT();
-		void setEndCode(char);
+    void WriteByte(const char);
+    void Init(uint32_t);
+    void EnableIT(IRQn_Type, uint16_t, FunctionalState);
+    void receiveByteIT();
+    void setEndCode(char);
 
     void println(char);
     void println(int, uint8_t base = DEC);
@@ -50,10 +47,10 @@ class SerialHardware: public Printer
     void println(const char *, double);
 
     inline void println()
-		{
-			WriteByte('\n');
-			WriteByte('\r');
-		}
+    {
+      WriteByte('\n');
+      WriteByte('\r');
+    }
 
     char readByte();
     uint8_t hasData()

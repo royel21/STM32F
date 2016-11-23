@@ -19,7 +19,9 @@ int main(void)
   Serial2.println('A');
   Serial2.EnableIT(USART2_IRQn, USART_IT_RXNE, ENABLE);
   Serial2.println('A');
-
+  long a = 1410545456;
+  Serial2.print("long:", a);
+  Serial2.println("long:", a);
   while (1)
   {
     if (Serial2.hasData())
