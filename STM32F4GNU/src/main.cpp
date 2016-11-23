@@ -28,10 +28,10 @@ int main(void)
     {
       Serial2.print(Serial2.readByte());
     }
-
+    // Serial2.println(Serial2.hasData());
     // Serial2.println('A');
     //Serial2.println('m');
-    // delayMillis(1);
+    delayMicros(500);
     //if (Serial2.hasData())
     // Serial2.print(Serial2.readByte(), HEX);
     // Serial2.println("TEST:");

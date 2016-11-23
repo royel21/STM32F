@@ -55,7 +55,7 @@ class SerialHardware: public Printer
     char readByte();
     uint8_t hasData()
     {
-      return (head == tail) ? 0 : 1;
+      return (uint8_t) (BUFFSIZE + head - tail) % BUFFSIZE;
     }
 
 };
