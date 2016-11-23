@@ -12,6 +12,8 @@ void IT_Init(IRQn_Type, uint16_t, uint16_t, FunctionalState);
 
 void GPIO_Config(GPIO_TypeDef *port, uint16_t pints, uint8_t mode, uint8_t pushpull = 0,
     uint8_t otyper = 0, uint8_t speed = 0, uint8_t af = 0);
+void GPIO_AFConfig(GPIO_TypeDef * port, uint16_t pins, uint8_t altF);
+
 #ifdef __cplusplus
 }
 #endif

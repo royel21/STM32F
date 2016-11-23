@@ -7,6 +7,10 @@
 
 #include "Printer.h"
 
+void Printer::WriteByte(char byte)
+{
+
+}
 void Printer::print(char ch)
 {
 	WriteByte(ch);

@@ -13,13 +13,26 @@ int main(void)
   //Init_Timer();
   //SerialHardware Serial2(USART2, GPIOA, P01 | P02, GPIO_AF_USART2);
   // TIM_PWM_Init(68);
+
   Serial2.Init(115200);
   Serial2.setEndCode('\r');
-  uint8_t head = 1;
-  uint8_t tail = 1;
+  Serial2.println('A');
+  Serial2.EnableIT(USART2_IRQn, USART_IT_RXNE, ENABLE);
+  Serial2.println('A');
+
   while (1)
   {
-    Serial2.println("H:", 350);
+    if (Serial2.hasData())
+    {
+      Serial2.print(Serial2.readByte());
+    }
+
+    // Serial2.println('A');
+    //Serial2.println('m');
+    // delayMillis(1);
+    //if (Serial2.hasData())
+    // Serial2.print(Serial2.readByte(), HEX);
+    // Serial2.println("TEST:");
   }
   return 0;
 }

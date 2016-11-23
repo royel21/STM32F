@@ -21,11 +21,11 @@ class SerialHardware: public Printer
 
 		USART_TypeDef *USARTx;
     char buff[BUFFSIZE];
-    uint8_t head;
-    uint8_t tail;
+    volatile uint8_t head;
+    volatile uint8_t tail;
 		char endCode;
     uint8_t ITStatus;
-	public:
+  public:
 		//uint8_t RxIndex = 0;
 		void WriteByte(const char);
 
@@ -55,10 +55,10 @@ class SerialHardware: public Printer
 			WriteByte('\r');
 		}
 
-    uint8_t readByte();
+    char readByte();
     uint8_t hasData()
     {
-      return (head != tail);
+      return (head == tail) ? 0 : 1;
     }
 
 };

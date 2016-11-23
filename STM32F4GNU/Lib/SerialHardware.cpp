@@ -6,7 +6,7 @@
  */
 
 #include "SerialHardware.h"
-
+int i = 0;
 SerialHardware::SerialHardware(USART_TypeDef *USARTy, GPIO_TypeDef *port, uint16_t pins,
     uint8_t AF_pin)
 {
@@ -56,8 +56,14 @@ void SerialHardware::EnableIT(IRQn_Type usart, uint16_t it,
 {
   ITStatus = 1;
   //USARTx->
-  USARTx->CR1 |= it;
-	IT_Init(usart, 0, 0, state);
+  USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE);
+  NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitStructure.NVIC_IRQChannel = it;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = state;
+  NVIC_Init(&NVIC_InitStructure);
+  NVIC_EnableIRQ(usart);
 }
 void SerialHardware::Init(uint32_t brr)
 {
@@ -80,7 +86,7 @@ void SerialHardware::WriteByte(const char byte)
 }
 
 
-uint8_t SerialHardware::readByte()
+char SerialHardware::readByte()
 {
   if (!ITStatus)
   {
@@ -90,9 +96,9 @@ uint8_t SerialHardware::readByte()
   } else
   {
     if (head == tail)
-      return 255;
+      return -1;
 
-    uint8_t ch = buff[tail];
+    char ch = buff[tail];
     tail = (tail + 1) % BUFFSIZE;
 
     return ch;
@@ -101,9 +107,9 @@ uint8_t SerialHardware::readByte()
 
 void SerialHardware::receiveByteIT()
 {
-	uint8_t ch = (USARTx->DR & 0xFF);
+  uint8_t ch = (USARTx->DR & 0xFF);
   uint8_t next = (head + 1) % BUFFSIZE;
-  if (head != tail)
+  if (next != tail)
   {
     buff[next] = ch;
     head = next;
@@ -186,9 +192,9 @@ extern "C" void USART1_IRQHandler()
 SerialHardware Serial2(USART2, GPIOA, P02 | P03, GPIO_AF_USART2);
 extern "C" void USART2_IRQHandler()
 {
-	if (USART_GetITStatus(USART2, USART_IT_RXNE))
+  if (USART2->SR & USART_IT_RXNE)
 	{
-		Serial2.receiveByteIT();
+    Serial2.receiveByteIT();
 	}
 }
 #endif

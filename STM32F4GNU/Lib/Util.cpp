@@ -17,7 +17,9 @@
 void GPIO_Config(GPIO_TypeDef *port, const uint16_t pins, uint8_t mode, uint8_t pushpull,
     uint8_t oTyper, uint8_t speed, uint8_t af)
 {
-  if (port == GPIOB)
+  if (port == GPIOA)
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+  else if (port == GPIOB)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
   else if (port == GPIOC)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
