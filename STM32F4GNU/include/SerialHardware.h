@@ -8,7 +8,7 @@
 #ifndef SERIALHARDWARE_HPP_
 #define SERIALHARDWARE_HPP_
 
-#include "stm32f4xx.h"
+#include "cmsis_device.h"
 #include "define.h"
 #include "Printer.h"
 #include "Util.h"
@@ -18,15 +18,15 @@
 class SerialHardware: public Printer
 {
   private:
-
     USART_TypeDef *USARTx;
+    uint32_t usartClock;
     char buff[BUFFSIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
     char endCode;
     uint8_t ITStatus;
   public:
-    SerialHardware(USART_TypeDef *, GPIO_TypeDef *, uint16_t, uint8_t);
+    SerialHardware(GPIO_TypeDef *, uint16_t, uint8_t);
 
     void WriteByte(const char);
     void Init(uint32_t);

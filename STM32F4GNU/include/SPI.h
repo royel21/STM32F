@@ -16,7 +16,7 @@ class SPI {
 		SPI_TypeDef *SPIx;
 	public:
 		SPI();
-    void init(GPIO_TypeDef *port, SPI_TypeDef *spi, uint16_t pins, uint8_t af);
+    void init(SPI_TypeDef *spi, uint16_t pins, uint8_t brControl = 0);
 		uint8_t send8Byte(uint8_t);
 		uint16_t send16Byte(uint16_t);
 		uint8_t receive8Byte();

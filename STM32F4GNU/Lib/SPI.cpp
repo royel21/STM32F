@@ -12,7 +12,7 @@ SPI::SPI()
 	SPIx = 0;
 }
 
-void SPI::init(GPIO_TypeDef *port, SPI_TypeDef *spi, uint16_t pins, uint8_t af)
+void SPI::init(SPI_TypeDef *spi, uint16_t pins, uint8_t brControl)
 {
 	this->SPIx = spi;
   if (spi == SPI1)
@@ -22,28 +22,31 @@ void SPI::init(GPIO_TypeDef *port, SPI_TypeDef *spi, uint16_t pins, uint8_t af)
   {
     RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
   }
-  GPIO_Config(port, pins, MODE_AF, PULL_NO, OTYPER_PP, SPEED_100MHz, af);
+  GPIO_Config(GPIOB, pins, MODE_AF, PULL_NO, OTYPER_PP, SPEED_100MHz, AF_SPI1);
 
-	SPI_InitTypeDef SPI_InitSt;
-	SPI_InitSt.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-	SPI_InitSt.SPI_Mode = SPI_Mode_Master;
-	SPI_InitSt.SPI_DataSize = SPI_DataSize_8b;
-	SPI_InitSt.SPI_CPOL = SPI_CPOL_High;
-	SPI_InitSt.SPI_CPHA = SPI_CPHA_1Edge;
-	SPI_InitSt.SPI_NSS = SPI_NSS_Soft;
-	SPI_InitSt.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
-	SPI_InitSt.SPI_FirstBit = SPI_FirstBit_MSB;
-	SPI_InitSt.SPI_CRCPolynomial = 7;
-	SPI_Init(SPIx, &SPI_InitSt);
+//	SPI_InitTypeDef SPI_InitSt;
+//	SPI_InitSt.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+//	SPI_InitSt.SPI_Mode = SPI_Mode_Master;
+//	SPI_InitSt.SPI_DataSize = SPI_DataSize_8b;
+//	SPI_InitSt.SPI_CPOL = SPI_CPOL_High;
+//	SPI_InitSt.SPI_CPHA = SPI_CPHA_1Edge;
+//	SPI_InitSt.SPI_NSS = SPI_NSS_Soft;
+//	SPI_InitSt.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
+//	SPI_InitSt.SPI_FirstBit = SPI_FirstBit_MSB;
+//	SPI_InitSt.SPI_CRCPolynomial = 7;
+//
 
-	SPI_Cmd(SPI1, ENABLE);
+//	SPI_Init(SPIx, &SPI_InitSt);
+  SPIx->CR1 |= SPI_CR1_CPOL | SPI_CR1_MSTR | (brControl << 3);
+  SPIx->CR1 |= SPI_CR1_SPE;
 
 
 }
 
 uint8_t SPI::send8Byte(uint8_t Byte)
 {
-	while((SPIx->SR&SPI_I2S_FLAG_TXE)==RESET);
+  while ((SPIx->SR & SPI_SR_TXE) == RESET)
+    ;
 	SPIx->DR=Byte;
 	//while((SPIx->SR&SPI_I2S_FLAG_RXNE)==RESET);
 	return SPIx->DR & 0xFF;

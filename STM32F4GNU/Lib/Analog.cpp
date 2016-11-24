@@ -66,10 +66,6 @@ void analogReadWithDMAMulti(uint16_t pins, volatile uint16_t *vars, uint8_t size
   ADC1->SQR1 |= (size - 1) << 20;
   //Enable ADC conversion
   ADC1->CR2 |= ADC_CR2_ADON;
-
-  //Select the channel to be read from
-  //ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
-  //ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_3Cycles);
   ADC1->CR2 |= ADC_CR2_SWSTART;
 }
 
@@ -89,15 +85,12 @@ double analogRead(uint16_t ch)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
     GPIOC->MODER |= 3 << ((ch - 9) * 2);
   }
-  //GPIO_Config(GPIOA, MODE_ANG, pin);
-  //  ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
-  //  ADC1->CR2 |= ADC_CR2_ADON;
-  //  while (!(ADC1->CR2 & ADC_CR2_ADON))
-  ADC1->SMPR2 = ADC_SampleTime_15Cycles;
+
+  ADC1->SMPR2 = ADC_SMPR2_SMP0_0;
   ADC1->SQR3 = ch;
   ADC1->CR2 = ADC_CR2_ADON;
   ADC1->CR2 |= ADC_CR2_SWSTART; //Start the conversion
-  while (!(ADC1->SR & ADC_FLAG_EOC))
+  while (!(ADC1->SR & ADC_SR_EOC))
     ; //Processing the conversion
 
   var = (((ADC1->DR & 0x0fff) * 3.3) / 4095);

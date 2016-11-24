@@ -10,7 +10,7 @@
 void TIM_PWM_Init(uint8_t frecuency)
 {
 	//GPIO Configuration
-  GPIO_Config(GPIOA, P08 | P09, MODE_AF, PULL_UP, OTYPER_PP, SPEED_100MHz, GPIO_AF_TIM1);
+  GPIO_Config(GPIOA, P08 | P09, MODE_AF, PULL_UP, OTYPER_PP, SPEED_100MHz, AF_TIM1);
 
   uint32_t frc = (((float) 1000 / frecuency) * 1000);
 	/***********************************************/

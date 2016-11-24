@@ -6,46 +6,54 @@
  */
 
 #include "SerialHardware.h"
+#include "misc.h"
 int i = 0;
-SerialHardware::SerialHardware(USART_TypeDef *USARTy, GPIO_TypeDef *port, uint16_t pins,
-    uint8_t AF_pin)
+SerialHardware::SerialHardware(GPIO_TypeDef *port, uint16_t pins, uint8_t AF_Func)
 {
   ITStatus = 0;
   endCode = 0x00;
   head = 0;
   tail = 0;
 //	buffIndex = 0;
-  USARTx = USARTy;
+
 //	userBuff = 1;
 #ifdef USE_USART1
-  if(USARTx == USART1)
+  if(AF_Func == AF_USART1)
   {
+    USARTx = USART1;
     RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+    usartClock = SystemCoreClock;
   }
 #endif
 
 #ifdef USE_USART2
-  if (USARTx == USART2)
+  if (AF_Func == AF_USART2)
   {
+    USARTx = USART2;
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+    usartClock = SystemCoreClock / 2;
   }
 #endif
 
 #ifdef USE_USART3
-  if(USARTx== USART3)
+  if(AF_Func == AF_USART3)
   {
+    USARTx = USART3;
     RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
+    usartClock = SystemCoreClock/2;
   }
 #endif
 
 #ifdef USE_USART6
-  else if(USARTx== USART6)
+  else if(AF_Func == AF_USART6)
   {
+    USARTx = USART6;
     RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
+    usartClock = SystemCoreClock;
   }
 }
 #endif
-  GPIO_Config(port, pins, MODE_AF, PULL_NO, OTYPER_PP, SPEED_100MHz, AF_pin);
+  GPIO_Config(port, pins, MODE_AF, PULL_NO, OTYPER_PP, SPEED_100MHz, AF_Func);
 }
 void SerialHardware::setEndCode(char code)
 {
@@ -66,14 +74,22 @@ void SerialHardware::EnableIT(IRQn_Type usart, uint16_t it, FunctionalState stat
 }
 void SerialHardware::Init(uint32_t brr)
 {
-  USART_InitTypeDef tUSART;
-  tUSART.USART_BaudRate = brr;
-  tUSART.USART_WordLength = USART_WordLength_8b;
-  tUSART.USART_StopBits = USART_StopBits_1;
-  tUSART.USART_Parity = USART_Parity_No;
-  tUSART.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  tUSART.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-  USART_Init(USARTx, &tUSART);
+  USARTx->CR1 |= USART_CR1_TE | USART_CR1_RE;
+
+  uint32_t tmpBRR = 0;
+  uint32_t intDV = 0;
+  uint32_t fracDV = 0;
+  /* Integer part computing in case Oversampling mode is 16 Samples */
+  intDV = ((25 * usartClock) / (4 * brr));
+  //* Determine the integer part */ (4 * (brr)))
+  tmpBRR = (intDV / 100) << 4;
+  /* Determine the fractional part */
+  fracDV = intDV - (100 * (tmpBRR >> 4));
+
+  tmpBRR |= ((((fracDV * 16) + 50) / 100)) & ((uint8_t) 0x0F);
+
+  USARTx->BRR = tmpBRR;
+
   USARTx->CR1 |= USART_CR1_UE; // USART ENABLE
 }
 
@@ -88,7 +104,7 @@ char SerialHardware::readByte()
 {
   if (!ITStatus)
   {
-    while (!(USARTx->SR & USART_FLAG_RXNE))
+    while (!(USARTx->SR & USART_SR_RXNE))
       ;
     return (USARTx->DR & 0xFF);
   } else
@@ -172,21 +188,21 @@ void SerialHardware::println(const char *str, double var)
 }
 
 #ifdef USE_USART1
-SerialHardware Serial1(USART1, GPIOA, P09, P10, AF_P09, AF_P10, AF_USART1);
+SerialHardware Serial1(GPIOA, P09, P10, AF_P09, AF_P10, AF_USART1);
 extern "C" void USART1_IRQHandler()
 {
-  if(USART_GetITStatus(USART1,USART_IT_RXNE))
+  if (USART1->SR & USART_SR_RXNE)
   {
-    Serial1.receiveByte();
+    Serial1.receiveByteIT();
   }
 }
 #endif
 
 #ifdef USE_USART2
-SerialHardware Serial2(USART2, GPIOA, P02 | P03, GPIO_AF_USART2);
+SerialHardware Serial2(GPIOA, P02 | P03, AF_USART2);
 extern "C" void USART2_IRQHandler()
 {
-  if (USART2->SR & USART_IT_RXNE)
+  if (USART2->SR & USART_SR_RXNE)
   {
     Serial2.receiveByteIT();
   }
@@ -194,24 +210,24 @@ extern "C" void USART2_IRQHandler()
 #endif
 
 #ifdef USE_USART3
-SerialHardware Serial3(USART2, GPIOA, P02 | P03, GPIO_AF_USART2);
+SerialHardware Serial3(GPIOA, P02 | P03, AF_USART3);
 extern "C" void USART3_IRQHandler()
 {
-  if (USART_GetITStatus(USART2, USART_IT_RXNE))
+  if (USART3->SR & USART_SR_RXNE)
   {
-    //Serial2.receiveByteIT();
+    Serial3.receiveByteIT();
   }
 }
 #endif
 
 #ifdef USE_USART6
-SerialHardware Serial6(USART2, GPIOC, P06, P07, AF_P06, AF_P07, AF_USART6);
+SerialHardware Serial6(GPIOC, P06, P07, AF_P06, AF_P07, AF_USART6);
 
 extern "C" void USART6_IRQHandler()
 {
-  if(USART_GetITStatus(USART1,USART_IT_RXNE))
+  if (USART6->SR & USART_SR_RXNE)
   {
-    Serial6.receiveByte();
+    Serial6.receiveByteIT();
   }
 }
 #endif

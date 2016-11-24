@@ -5,6 +5,7 @@
  *      Author: RoyerAriel
  */
 #include "Util.h"
+#include "misc.h"
 /*
  * 1:GPIO PORT
  * 2:GPIO ORE PINS PXX | PXX
