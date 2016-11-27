@@ -24,11 +24,11 @@ class LCD_I2C: public Printer
 		void Write4Bits(uint8_t);
 	public:
 
-		LCD_I2C(uint8_t);
+    LCD_I2C(uint8_t);
 
 		void WriteByte(const char);
 
-		void Init();
+    void Init();
 		void WriteCmd(uint8_t);
 
 		void Clear();

@@ -37,7 +37,9 @@ void GPIO_Config(GPIO_TypeDef *port, const uint16_t pins, uint8_t mode, uint8_t 
       {
         if (mode == MODE_AF)
         {
-          port->AFR[pin >> 3] |= (af << (pin & 0x07) * 4);
+          uint32_t temp_port = port->AFR[pin >> 3];
+          temp_port |= (af << (pin & 0x07) * 4);
+          port->AFR[pin >> 3] = temp_port;
         }
         // set GPIO PORT Mode Register
         port->OTYPER |= (oTyper << pin); // set GPIO PORT OUTPUT Type Register

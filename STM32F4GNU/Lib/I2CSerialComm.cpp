@@ -7,52 +7,61 @@
 
 #include "I2CSerialComm.h"
 
-I2CSerialComm::I2CSerialComm(GPIO_TypeDef *port, I2C_TypeDef *I2Cx, uint16_t pins, uint8_t af)
+I2CSerialComm::I2CSerialComm(uint8_t af, uint16_t pins)
 {
-  this->I2Cx = I2Cx;
-  address = 0;
-  // init GPIOB
-  GPIO_Config(port, pins, MODE_AF, PULL_UP, OTYPER_OD, SPEED_100MHz, af);
 
-  if (I2Cx == I2C1)
+  address = 0;
+  ////  // Connect I2Cx pins to AF
+  GPIO_Config(GPIOB, pins, MODE_AF, PULL_UP, OTYPER_OD, SPEED_100MHz, AF_I2C1);
+  // configure I2C1
+  if (af == AF_I2C1)
   {
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
-  } else if (I2Cx == I2C2)
+    this->I2Cx = I2C1;
+  } else if (af == AF_I2C2)
   {
     RCC->APB1ENR |= RCC_APB1ENR_I2C2EN;
+    this->I2Cx = I2C2;
   }
-  // configure I2Cx
+  // configure I2C1
+  uint16_t tmpreg = 0, freqrange = 0;
+  uint16_t result = 0x04;
 
-//  I2C_InitTypeDef I2C_InitStruct;
-//  I2C_InitStruct.I2C_ClockSpeed = I2C_SPD; 		// 100kHz
-//  I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;			// I2C mode
-//  I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;	// 50% duty cycle --> standard
-//  I2C_InitStruct.I2C_OwnAddress1 = 0x00;	// own address, not relevant in master mode
-//  I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;// disable acknowledge when reading (can be changed later on)
-//  I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; // set address length to 7 bit addresses
-//  I2C_Init(I2Cx, &I2C_InitStruct);				// init I2Cx
+  /* Get pclk1 frequency value */
+  uint32_t pclk1 = (SystemCoreClock / 2);
+  /* Set frequency bits depending on pclk1 value */
+  freqrange = (uint16_t) (pclk1 / 1000000);
+  /* Write to I2C1 CR2 */
+  I2Cx->CR2 = freqrange; //tmpreg;
 
-  uint32_t CCR = 0;
-  uint8_t frec = 0;
-  uint32_t ABPCLK = (SystemCoreClock / 2);
-
-  frec = ABPCLK / 1000000;
-
-  I2Cx->CR2 = frec;
-
-  if (I2C_SPD & 100000)
+  /* Configure speed in standard mode */
+  if (I2C_SPD <= 100000)
   {
-    CCR = (uint16_t) (ABPCLK / I2C_SPD << 1);
-    I2Cx->TRISE = frec + 1;
-  } else
-  {
-    CCR |= (uint16_t) (ABPCLK / (I2C_SPD * 3)) | I2C_CCR_FS;
+    /* Standard mode speed calculate */
+    result = (uint16_t) (pclk1 / (I2C_SPD << 1));
+    /* Test if CCR value is under 0x4*/
+    tmpreg = result < 0x04 ? 0x04 : result;
+
+    /* Set Maximum Rise Time for standard mode */
+    I2Cx->TRISE = freqrange + 1;
   }
-  I2Cx->CCR = CCR;
+  /* Configure speed in fast mode */
+  /* To use the I2C at 400 KHz (in fast mode), the PCLK1 frequency (I2C peripheral
+   input clock) must be a multiple of 10 MHz */
+  else /*(I2C_InitStruct->I2C_ClockSpeed <= 400000)*/
+  {
+    /* Fast mode speed calculate: Tlow/Thigh = 2 */
+    result = (uint16_t) (pclk1 / (I2C_SPD * 3));
+    /* Set speed value and set F/S bit for fast mode */
+    tmpreg |= (uint16_t) (result | I2C_CCR_FS);
+    /* Set Maximum Rise Time for fast mode */
+    I2Cx->TRISE = (uint16_t) (((freqrange * (uint16_t) 300) / (uint16_t) 1000) + (uint16_t) 1);
+  }
+
+  I2Cx->CCR = tmpreg;
+
   I2Cx->CR1 |= I2C_CR1_PE | I2C_CR1_ACK;
-  ;
 }
-
 /*Set the address of the device to work with*/
 void I2CSerialComm::setAddress(uint8_t address)
 {
@@ -238,36 +247,36 @@ void I2CSerialComm::hardReset()
   I2Cx->CR1 &= ~I2C_CR1_SWRST;
   I2Cx->CR1 |= I2C_CR1_PE;
 }
-//void I2C1_EV_IRQHandler(void)
-//{
-//
-//    switch(I2C_GetLastEvent(I2C2))
-//    {
-//    case I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED :
-//        break;
-//    case I2C_EVENT_SLAVE_BYTE_RECEIVED:
-//       // i2c_read_packet[Rx_Index] = I2C_ReceiveData(I2C2); // Store the packet in i2c_read_packet.
-//        //Rx_Index++;
-//        break;
-//    case I2C_EVENT_SLAVE_STOP_DETECTED :
-//       // Rx_Index = 0;
-//       // packets_recv_i2c++;
-//       // i2cProcessPacket();
-//        break;
-//    case I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED:
-//       // I2C_SendData(I2C2, i2c_packet_to_send[0]);
-//       // Tx_Index++;
-//        break;
-//    case I2C_EVENT_SLAVE_BYTE_TRANSMITTED:
-//        //I2C_SendData(I2C2, i2c_packet_to_send[Tx_Index]);
-//        //Tx_Index++;
-//        break;
-//    case I2C_EVENT_SLAVE_ACK_FAILURE:
-//       // Tx_Index = 0;
-//      //  packets_sent_i2c++;
-//        break;
-//    default:
-//        break;
-//    }
-//}
-I2CSerialComm I2C1Comm = I2CSerialComm(GPIOB, I2C1, P08 | P09, AF9_I2C2);
+void I2C1_EV_IRQHandler(void)
+{
+
+  switch (I2C_GetLastEvent(I2C1))
+  {
+    case I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED:
+    break;
+    case I2C_EVENT_SLAVE_BYTE_RECEIVED:
+      // i2c_read_packet[Rx_Index] = I2C_ReceiveData(I2C2); // Store the packet in i2c_read_packet.
+      //Rx_Index++;
+    break;
+    case I2C_EVENT_SLAVE_STOP_DETECTED:
+      // Rx_Index = 0;
+      // packets_recv_i2c++;
+      // i2cProcessPacket();
+    break;
+    case I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED:
+      // I2C_SendData(I2C2, i2c_packet_to_send[0]);
+      // Tx_Index++;
+    break;
+    case I2C_EVENT_SLAVE_BYTE_TRANSMITTED:
+      //I2C_SendData(I2C2, i2c_packet_to_send[Tx_Index]);
+      //Tx_Index++;
+    break;
+    case I2C_EVENT_SLAVE_ACK_FAILURE:
+      // Tx_Index = 0;
+      //  packets_sent_i2c++;
+    break;
+    default:
+    break;
+  }
+}
+I2CSerialComm I2C1Comm = I2CSerialComm(AF_I2C1, P08 | P09);

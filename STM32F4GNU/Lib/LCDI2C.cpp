@@ -11,7 +11,7 @@ LCD_I2C::LCD_I2C(uint8_t addr)
 {
 	address = addr;
 	cmd = 0x0C;
-	blackLightState |= 0x08;
+  blackLightState = 0x08;
 }
 
 void LCD_I2C::Init()
