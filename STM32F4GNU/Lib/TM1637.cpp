@@ -120,7 +120,8 @@ void TM1637::showNumberDec(int num, bool leading_zero, uint8_t length, uint8_t p
 void TM1637::start()
 {
 	PORT->ODR ^= CLOCK | DIO;
-	delayMicros(50);
+	delayMicros(5);
+	PORT->ODR ^= CLOCK;
 }
 
 void TM1637::stop()
