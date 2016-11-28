@@ -108,9 +108,7 @@
 #define AF_UART7         ((uint8_t)0x08)  /* UART7 Alternate Function mapping  */
 #define AF_UART8         ((uint8_t)0x08)  /* UART8 Alternate Function mapping  */
 
-#define AF_I2C1          ((uint8_t)0x04)  /* I2C1 Alternate Function mapping */
-#define AF_I2C2          ((uint8_t)0x04)  /* I2C2 Alternate Function mapping */
-#define AF_I2C3          ((uint8_t)0x04)  /* I2C3 Alternate Function mapping */
+#define AF_I2C          ((uint8_t)0x04)  /* I2C1 Alternate Function mapping */
 #define AF_SPI1          ((uint8_t)0x05)  /* SPI1/I2S1 Alternate Function mapping */
 #define AF_SPI2          ((uint8_t)0x05)  /* SPI2/I2S2 Alternate Function mapping */
 #define AF5_SPI3         ((uint8_t)0x05)  /* SPI3/I2S3 Alternate Function mapping (Only for STM32F411xE Devices) */

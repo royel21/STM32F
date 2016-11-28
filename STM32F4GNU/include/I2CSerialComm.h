@@ -19,7 +19,7 @@ class I2CSerialComm
     uint8_t address;
     I2C_TypeDef *I2Cx;
   public:
-    I2CSerialComm(uint8_t, uint16_t pins);
+		I2CSerialComm(I2C_TypeDef *i2c, uint16_t pins);
 
     void setAddress(uint8_t);
     uint8_t Start(uint8_t, uint8_t);
