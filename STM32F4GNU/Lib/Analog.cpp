@@ -24,7 +24,7 @@ void analogReadWithDMAMulti(uint16_t pins, volatile uint16_t *vars, uint8_t size
 
   DMA2_Stream0->CR |= DMA_SxCR_EN;
 
-  IT_Init(DMA2_Stream0_IRQn, 0, 0, ENABLE);
+  InterruptEnabler(DMA2_Stream0_IRQn, 0, 0);
 
   int8_t order = 0;
   for (uint8_t pin = 0; pin < 16; pin++)
@@ -69,10 +69,10 @@ void analogReadWithDMAMulti(uint16_t pins, volatile uint16_t *vars, uint8_t size
   ADC1->CR2 |= ADC_CR2_SWSTART;
 }
 
-double analogRead(uint16_t ch)
+uint16_t analogRead(uint16_t ch)
 {
   RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
-  double var = 0;
+  uint16_t var = 0;
   if (ch < 7)
   {
     GPIOA->MODER |= (3 << (ch * 2));
@@ -93,7 +93,7 @@ double analogRead(uint16_t ch)
   while (!(ADC1->SR & ADC_SR_EOC))
     ; //Processing the conversion
 
-  var = (((ADC1->DR & 0x0fff) * 3.3) / 4095);
+  var = ADC1->DR & 0x0fff;
   RCC->APB2ENR &= ~RCC_APB2ENR_ADC1EN;
   ADC1->CR2 = ADC1->SMPR2 = 0x00;
 

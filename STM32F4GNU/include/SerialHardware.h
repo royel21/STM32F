@@ -24,13 +24,12 @@ class SerialHardware: public Printer
     volatile uint8_t head;
     volatile uint8_t tail;
     char endCode;
-    uint8_t ITStatus;
+    uint8_t ITenable;
   public:
-    SerialHardware(GPIO_TypeDef *, uint16_t, uint8_t);
+    SerialHardware(USART_TypeDef *, uint16_t, uint8_t);
 
     void WriteByte(const char);
     void Init(uint32_t);
-    void EnableIT(IRQn_Type, uint16_t, FunctionalState);
     void receiveByteIT();
     void setEndCode(char);
 

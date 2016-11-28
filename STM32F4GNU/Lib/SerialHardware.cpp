@@ -8,70 +8,67 @@
 #include "SerialHardware.h"
 #include "misc.h"
 int i = 0;
-SerialHardware::SerialHardware(GPIO_TypeDef *port, uint16_t pins, uint8_t AF_Func)
+SerialHardware::SerialHardware(USART_TypeDef *usart, uint16_t pins, uint8_t AF_Func)
 {
-  ITStatus = 0;
+  ITenable = 0;
   endCode = 0x00;
   head = 0;
   tail = 0;
-//	buffIndex = 0;
 
-//	userBuff = 1;
+  GPIO_TypeDef *port = GPIOA;
+  IRQn_Type it = USART2_IRQn;
+
 #ifdef USE_USART1
-  if(AF_Func == AF_USART1)
+  if (usart == USART1)
   {
-    USARTx = USART1;
     RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
-    usartClock = SystemCoreClock;
+    usartClock = SystemCoreClock / 4;
+    USARTx = USART1;
+    it = USART1_IRQn;
   }
 #endif
 
 #ifdef USE_USART2
-  if (AF_Func == AF_USART2)
+  if (usart == USART2)
   {
-    USARTx = USART2;
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
     usartClock = SystemCoreClock / 2;
+    USARTx = USART2;
+    it = USART2_IRQn;
   }
 #endif
 
 #ifdef USE_USART3
-  if(AF_Func == AF_USART3)
+  if(usart == USART3)
   {
-    USARTx = USART3;
     RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
     usartClock = SystemCoreClock/2;
+    USARTx = USART3;
+    it = USART3_IRQn;
   }
 #endif
 
 #ifdef USE_USART6
-  else if(AF_Func == AF_USART6)
+  else if (usart == USART6)
   {
-    USARTx = USART6;
     RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
     usartClock = SystemCoreClock;
+    USARTx = USART6;
+    it = USART6_IRQn;
+    port = GPIOC;
   }
-}
 #endif
+
   GPIO_Config(port, pins, MODE_AF, PULL_NO, OTYPER_PP, SPEED_100MHz, AF_Func);
+  USARTx->CR1 |= USART_CR1_RXNEIE;
+  InterruptEnabler(it, 0, 0);
 }
+
 void SerialHardware::setEndCode(char code)
 {
   endCode = code;
 }
-void SerialHardware::EnableIT(IRQn_Type usart, uint16_t it, FunctionalState state)
-{
-  ITStatus = 1;
-  //USARTx->
-  USARTx->CR1 |= USART_CR1_RXNEIE;
-  NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel = it;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = state;
-  NVIC_Init(&NVIC_InitStructure);
-  NVIC_EnableIRQ(usart);
-}
+
 void SerialHardware::Init(uint32_t brr)
 {
   USARTx->CR1 |= USART_CR1_TE | USART_CR1_RE;
@@ -87,10 +84,10 @@ void SerialHardware::Init(uint32_t brr)
   fracDV = intDV - (100 * (tmpBRR >> 4));
 
   tmpBRR |= ((((fracDV * 16) + 50) / 100)) & ((uint8_t) 0x0F);
-
+//
   USARTx->BRR = tmpBRR;
-
   USARTx->CR1 |= USART_CR1_UE; // USART ENABLE
+
 }
 
 void SerialHardware::WriteByte(const char byte)
@@ -102,19 +99,11 @@ void SerialHardware::WriteByte(const char byte)
 
 char SerialHardware::readByte()
 {
-  if (!ITStatus)
-  {
-    while (!(USARTx->SR & USART_SR_RXNE))
-      ;
-    return (USARTx->DR & 0xFF);
-  } else
-  {
-    if (tail == head)
-      return -1;
+  if (tail == head)
+    return -1;
 
-    tail = (tail + 1) % BUFFSIZE;
-    return buff[tail];
-  }
+  tail = (tail + 1) % BUFFSIZE;
+  return buff[tail];
 }
 
 void SerialHardware::receiveByteIT()
@@ -188,7 +177,7 @@ void SerialHardware::println(const char *str, double var)
 }
 
 #ifdef USE_USART1
-SerialHardware Serial1(GPIOA, P09, P10, AF_P09, AF_P10, AF_USART1);
+SerialHardware Serial1(USART1, P09 | P10, AF_USART1);
 extern "C" void USART1_IRQHandler()
 {
   if (USART1->SR & USART_SR_RXNE)
@@ -199,7 +188,7 @@ extern "C" void USART1_IRQHandler()
 #endif
 
 #ifdef USE_USART2
-SerialHardware Serial2(GPIOA, P02 | P03, AF_USART2);
+SerialHardware Serial2(USART2, P02 | P03, AF_USART2);
 extern "C" void USART2_IRQHandler()
 {
   if (USART2->SR & USART_SR_RXNE)
@@ -210,7 +199,7 @@ extern "C" void USART2_IRQHandler()
 #endif
 
 #ifdef USE_USART3
-SerialHardware Serial3(GPIOA, P02 | P03, AF_USART3);
+SerialHardware Serial3(USART3, P02 | P03, AF_USART3);
 extern "C" void USART3_IRQHandler()
 {
   if (USART3->SR & USART_SR_RXNE)
@@ -221,7 +210,7 @@ extern "C" void USART3_IRQHandler()
 #endif
 
 #ifdef USE_USART6
-SerialHardware Serial6(GPIOC, P06, P07, AF_P06, AF_P07, AF_USART6);
+SerialHardware Serial6(USART6, P06 | P07, AF_USART6);
 
 extern "C" void USART6_IRQHandler()
 {

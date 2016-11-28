@@ -49,7 +49,7 @@ extern "C" {
 #define CH15                                 ((uint8_t)0x0F)
 //	uint16_t adcVal = 0;
 void analogReadWithDMAMulti(uint16_t pins, volatile uint16_t *vars, uint8_t size);
-double analogRead(uint16_t);
+uint16_t analogRead(uint16_t);
 
 #ifdef __cplusplus
 }

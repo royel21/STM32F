@@ -9,6 +9,7 @@
 #define MACROSPIN_HPP_
 #include "cmsis_device.h"
 #define USE_USART2
+#define USE_USART6
 #define NOP						   asm("nop")
 
 #define BIN						   ((uint8_t)0x02)

@@ -49,34 +49,28 @@ void GPIO_Config(GPIO_TypeDef *port, const uint16_t pins, uint8_t mode, uint8_t 
     }
   }
 }
-/*
- * 1:GPIO PORTX
- * 2:GPIO ORE PINS PXX | PXX
- * 3:GPIO AF AF_XXX
- *
- */
-void GPIO_AFConfig(GPIO_TypeDef * port, uint16_t pins, uint8_t altF)
-{
-  uint8_t pin = 0x00;
-  while (pins >> pin)
-  {
-    if ((pins & (1 << pin)))
-    {
-      port->AFR[pin >> 3] |= (altF << (pin & 0x07) * 4);
-    }
-    pin++;
-  }
 
-}
-
-void IT_Init(IRQn_Type irq, uint16_t priority, uint16_t subPriority, FunctionalState state)
+///* Enable the selected interrupt
+///* 1:IRQn_Type
+///* 2:Priority
+///* 3:SubPriority
+void InterruptEnabler(IRQn_Type irq, uint16_t priority, uint16_t subPriority)
 {
-  NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel = irq;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = priority;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = subPriority;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = state;
-  NVIC_Init(&NVIC_InitStructure);
-  NVIC_EnableIRQ(irq);
+  uint8_t tmppriority = 0x00, tmppre = 0x00, tmpsub = 0x0F;
+
+  /* Compute the Corresponding IRQ Priority --------------------------------*/
+  tmppriority = (0x700 - ((SCB->AIRCR) & (uint32_t) 0x700)) >> 0x08;
+  tmppre = (0x4 - tmppriority);
+  tmpsub = tmpsub >> tmppriority;
+
+  tmppriority = priority << tmppre;
+  tmppriority |= (uint8_t) (subPriority & tmpsub);
+
+  tmppriority = tmppriority << 0x04;
+
+  NVIC->IP[irq] = tmppriority;
+
+  /* Enable the Selected IRQ Channels --------------------------------------*/
+  NVIC->ISER[irq >> 0x05] = (uint32_t) 0x01 << (irq & (uint8_t) 0x1F);
 }
 
