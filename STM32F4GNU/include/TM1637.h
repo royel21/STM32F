@@ -30,9 +30,10 @@
 #define DOTON  (uint8_t)0x1
 #define DOTOFF (uint8_t)0x0
 
-#define LOWLIGHT (uint8_t)0x08
-#define MEDLIGHT (uint8_t)0x0A
+#define LOWLIGHT  (uint8_t)0x08
+#define MEDLIGHT  (uint8_t)0x0A
 #define HIGHLIGHT (uint8_t)0x0F
+
 class TM1637
 {
 

@@ -4,7 +4,7 @@
 int main(void)
 {
 	TM1637 tm1637(GPIOC, P00, P01);
-	tm1637.setLight(MEDLIGHT);
+	tm1637.setLight(HIGHLIGHT);
 //	uint8_t data[] =
 //	{ 1, 2, 3, 4 };
 //	tm1637.setSegs(data, DOTON);
