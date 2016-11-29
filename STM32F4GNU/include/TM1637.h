@@ -27,17 +27,21 @@
 #include "util.h"
 #include "Timer.h"
 
-#define DOTON  (uint8_t)0x80
-#define DOTOFF (uint8_t)0x7f
+#define DOTON  (uint8_t)0x1
+#define DOTOFF (uint8_t)0x0
+
+#define LOWLIGHT (uint8_t)0x08
+#define MEDLIGHT (uint8_t)0x0A
+#define HIGHLIGHT (uint8_t)0x0F
 class TM1637
 {
 
 	public:
 		TM1637(GPIO_TypeDef *port, uint16_t clock, int16_t dio);
-		void setBrightness(uint8_t brightness);
-		void setSegments(const uint8_t seg, uint8_t pos = 3);
-		void setSegments(const uint8_t *segs, uint8_t pos = 0);
-		void showNumberDec(int num, uint8_t dot = 0);
+		void setLight(uint8_t brightness);
+		void setSegs(const uint8_t seg, uint8_t pos = 0, uint8_t d = 0x00);
+		void setSegs(const uint8_t *segs, uint8_t d = 0x80);
+		void print(int num, uint8_t dot = 0x80);
 
 	private:
 		void start();
@@ -47,7 +51,6 @@ class TM1637
 		uint8_t CLOCK;
 		uint8_t DIO;
 		uint8_t brightness;
-		uint8_t dots;
 
 };
 

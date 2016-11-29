@@ -18,11 +18,11 @@
 
 #define delayck   delayMicros(10)
 
-#define TM1637_I2C_COMM1    (uint8_t)0x40
-#define TM1637_I2C_COMM2    (uint8_t)0xC0
-#define TM1637_I2C_COMM3    (uint8_t)0x80
+#define CMD1    (uint8_t)0x44
+#define CMD2    (uint8_t)0xC0
+#define CMD3    (uint8_t)0x80
 
-const uint8_t seg[] =
+const uint8_t segm[] =
 { 0x3F,   // 0
 		0x06,   // 1
 		0x5B,   // 2
@@ -47,7 +47,6 @@ TM1637::TM1637(GPIO_TypeDef *port, uint16_t clock, int16_t dio)
 	brightness = 0;
 	CLOCK = clock;
 	DIO = dio;
-	dots = 0x00;
 	// Set the pin direction and default value.
 	// Both pins are set as inputs, allowing the pull-up resistors to pull them up
 	GPIO_Config(port, clock | dio, MODE_OUT, PULL_UP, OTYPER_OD, SPEED_100MHz);
@@ -106,54 +105,48 @@ void TM1637::stop()
 	delayck;
 }
 
-void TM1637::setBrightness(uint8_t brightness)
+void TM1637::setLight(uint8_t brightness)
 {
 	this->brightness = brightness;
 }
 
-void TM1637::setSegments(const uint8_t segs, uint8_t pos)
+void TM1637::setSegs(const uint8_t *segs, uint8_t d)
 {
-	uint8_t digits[4] =
-	{ 0, 0, 0, 0 }; // 0 0 : 0 0
-	digits[pos] = seg[segs];
-	setSegments(digits);
+	for (uint8_t i = 0; i < 4; i++)
+		setSegs(segs[i], i + 1, d);
 }
-void TM1637::setSegments(const uint8_t *segments, uint8_t pos)
+void TM1637::setSegs(const uint8_t segs, uint8_t pos, uint8_t d)
 {
 	// Write COMM1
 	start();
-	writeByte(TM1637_I2C_COMM1);
+	writeByte(CMD1);
 	stop();
 
 	// Write COMM2 + first digit address
 	start();
-	writeByte(TM1637_I2C_COMM2 + (pos & (uint8_t) 0x03));
+	writeByte(CMD2 + ((3 - (pos - 1)) & (uint8_t) 0x03));
 
 	// Write the data bytes
-	for (uint8_t k = 0; k < 4; k++)
-		writeByte(segments[k] | dots);
+	writeByte(segm[segs] | (d << 7));
 
 	stop();
 
 	// Write COMM3 + brightness
 	start();
-	writeByte(TM1637_I2C_COMM3 + (brightness & (uint8_t) 0x0f));
+	writeByte(CMD3 + (brightness & (uint8_t) 0x0f));
 	stop();
 }
 
-void TM1637::showNumberDec(int num, uint8_t d)
+void TM1637::print(int num, uint8_t d)
 {
 	uint8_t digits[4] =
-	{ seg[0], seg[0], seg[0], seg[0] }; // 0 0 : 0 0
-	int i = 3;
+	{ 0, 0, 0, 0 };
+	int i = 0;
 	do
 	{
-		digits[i--] = seg[(num % 10)]; //integer to ANSI
+		digits[i++] = (num % 10); //integer to ANSI
 		num /= 10;
 	} while (num);
-	this->dots = d & DOTON;
-	setSegments(digits);
+	setSegs(digits, d);
 }
-
-
 
