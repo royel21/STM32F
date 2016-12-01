@@ -72,7 +72,6 @@ void SerialHardware::setEndCode(char code)
 void SerialHardware::Init(uint32_t brr)
 {
   USARTx->CR1 |= USART_CR1_TE | USART_CR1_RE;
-
   uint32_t tmpBRR = 0;
   uint32_t intDV = 0;
   uint32_t fracDV = 0;
@@ -87,7 +86,6 @@ void SerialHardware::Init(uint32_t brr)
 //
   USARTx->BRR = tmpBRR;
   USARTx->CR1 |= USART_CR1_UE; // USART ENABLE
-
 }
 
 void SerialHardware::WriteByte(const char byte)

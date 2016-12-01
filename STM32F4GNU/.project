@@ -24,4 +24,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>libraries/LedControl</name>
+			<type>2</type>
+			<location>C:/Users/RoyerAriel/Documents/Arduino/libraries/LedControl</location>
+		</link>
+	</linkedResources>
 </projectDescription>

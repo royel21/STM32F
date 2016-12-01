@@ -15,6 +15,8 @@
 #define BIN						   ((uint8_t)0x02)
 #define DEC						   ((uint8_t)0x0A)
 #define HEX						   ((uint8_t)0x10)
+#define LOW						   ((uint8_t)0x00)
+#define HIGH					   ((uint8_t)0x01)
 
 #define TIM_CCMR1_OC1PWM1		((uint16_t)0x00000060)
 #define TIM_CCMR1_OC1PWM2		((uint16_t)0x00000070)
@@ -108,13 +110,8 @@
 #define AF_UART7         ((uint8_t)0x08)  /* UART7 Alternate Function mapping  */
 #define AF_UART8         ((uint8_t)0x08)  /* UART8 Alternate Function mapping  */
 
-#define AF_I2C          ((uint8_t)0x04)  /* I2C1 Alternate Function mapping */
-#define AF_SPI1          ((uint8_t)0x05)  /* SPI1/I2S1 Alternate Function mapping */
-#define AF_SPI2          ((uint8_t)0x05)  /* SPI2/I2S2 Alternate Function mapping */
-#define AF5_SPI3         ((uint8_t)0x05)  /* SPI3/I2S3 Alternate Function mapping (Only for STM32F411xE Devices) */
-#define AF_SPI4          ((uint8_t)0x05)  /* SPI4/I2S4 Alternate Function mapping */
-#define AF_SPI5          ((uint8_t)0x05)  /* SPI5 Alternate Function mapping      */
-#define AF_SPI6          ((uint8_t)0x05)  /* SPI6 Alternate Function mapping      */
+#define AF_I2C           ((uint8_t)0x04)  /* I2C1 Alternate Function mapping */
+#define AF_SPI           ((uint8_t)0x05)  /* SPI1/I2S1 Alternate Function mapping */
 
 #define AF7_SPI3          ((uint8_t)0x07)  /* SPI3/I2S3ext Alternate Function mapping */
 #define AF_SPI3          ((uint8_t)0x06)  /* SPI3/I2S3 Alternate Function mapping */

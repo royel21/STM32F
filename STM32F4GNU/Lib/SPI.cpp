@@ -7,47 +7,76 @@
 
 #include "SPI.h"
 
-SPI::SPI()
+SPI::SPI(SPI_TypeDef *spi, uint16_t pins)
 {
-	SPIx = 0;
+	PORT = 0;
+	PIN = 0;
+	this->SPIx = spi;
+	if (spi == SPI1)
+	{
+		RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+	} else if (spi == SPI2)
+	{
+		RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+	}
+	GPIO_Config(GPIOA, pins, MODE_AF, PULL_DOWN, OTYPER_PP, SPEED_50MHz, AF_SPI);
+
 }
 
-void SPI::init(SPI_TypeDef *spi, uint16_t pins, uint8_t brControl)
+void SPI::setBidiMode(uint8_t direction)
 {
-	this->SPIx = spi;
-  if (spi == SPI1)
-  {
-    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
-  } else if (spi == SPI2)
-  {
-    RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
-  }
-  GPIO_Config(GPIOB, pins, MODE_AF, PULL_NO, OTYPER_PP, SPEED_100MHz, AF_SPI1);
+	SPIx->CR1 |= SPI_CR1_BIDIMODE | (direction << 14);
+}
 
-//	SPI_InitTypeDef SPI_InitSt;
-//	SPI_InitSt.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-//	SPI_InitSt.SPI_Mode = SPI_Mode_Master;
-//	SPI_InitSt.SPI_DataSize = SPI_DataSize_8b;
-//	SPI_InitSt.SPI_CPOL = SPI_CPOL_High;
-//	SPI_InitSt.SPI_CPHA = SPI_CPHA_1Edge;
-//	SPI_InitSt.SPI_NSS = SPI_NSS_Soft;
-//	SPI_InitSt.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
-//	SPI_InitSt.SPI_FirstBit = SPI_FirstBit_MSB;
-//	SPI_InitSt.SPI_CRCPolynomial = 7;
-//
+void SPI::setCPHA(uint8_t cpha)
+{
+	cpha ? SPIx->CR1 |= SPI_CR1_SPE | SPI_CR1_CPHA : SPIx->CR1 &= ~SPI_CR1_CPHA;
+}
 
-//	SPI_Init(SPIx, &SPI_InitSt);
-  SPIx->CR1 |= SPI_CR1_CPOL | SPI_CR1_MSTR | (brControl << 3);
-  SPIx->CR1 |= SPI_CR1_SPE;
+void SPI::setCPOL(uint8_t cpol)
+{
+	cpol ? SPIx->CR1 |= SPI_CR1_CPOL : SPIx->CR1 &= ~SPI_CR1_CPOL;
+}
 
+void SPI::softPin(GPIO_TypeDef *port, uint16_t pin)
+{
+	GPIO_Config(port, pin, MODE_OUT, PULL_UP);
+	PORT = port;
+	PIN = pin;
+	port->BSRRL |= pin;
+}
 
+void SPI::slaveSelect(uint8_t ss)
+{
+	ss ? PORT->BSRRL |= PIN : PORT->BSRRH |= PIN;
+}
+void SPI::start(uint8_t brr)
+{
+//	//SPIx->CR1 |= (br << 3) | SPI_CR1_DFF;
+//	SPIx->CR1 |= (brr < 3) | SPI_CR1_SSM | SPI_CR1_SSI;
+//	SPIx->CR1 |= SPI_CR1_MSTR | SPI_CR1_SPE;
+
+	SPIx->CR1 |= SPI_CR1_SSM | SPI_CR1_SSI | (brr << 3) | SPI_CR1_MSTR | SPI_CR1_DFF;
+
+	SPIx->CR1 |= SPI_CR1_SPE;
 }
 
 uint8_t SPI::send8Byte(uint8_t Byte)
 {
-  while ((SPIx->SR & SPI_SR_TXE) == RESET)
-    ;
-	SPIx->DR=Byte;
-	//while((SPIx->SR&SPI_I2S_FLAG_RXNE)==RESET);
+	while ((SPIx->SR & SPI_SR_TXE) == RESET)
+		;
+	SPIx->DR = Byte;
+	while ((SPIx->SR & SPI_SR_RXNE) == RESET)
+		;
 	return SPIx->DR & 0xFF;
+}
+
+uint16_t SPI::send16Byte(uint16_t word)
+{
+	while ((SPIx->SR & SPI_SR_TXE) == RESET)
+		;
+	SPIx->DR = word;
+	while ((SPIx->SR & SPI_SR_RXNE) == RESET)
+		;
+	return SPIx->DR & 0xFFFF;
 }
