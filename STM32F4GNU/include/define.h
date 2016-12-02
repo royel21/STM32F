@@ -17,7 +17,8 @@
 #define HEX						   ((uint8_t)0x10)
 #define LOW						   ((uint8_t)0x00)
 #define HIGH					   ((uint8_t)0x01)
-
+#define ON							HIGH
+#define OFF							LOW
 #define TIM_CCMR1_OC1PWM1		((uint16_t)0x00000060)
 #define TIM_CCMR1_OC1PWM2		((uint16_t)0x00000070)
 #define TIM_CCMR1_OC2PWM1		((uint16_t)0x00006000)

@@ -46,10 +46,11 @@ void SPI::softPin(GPIO_TypeDef *port, uint16_t pin)
 	port->BSRRL |= pin;
 }
 
-void SPI::slaveSelect(uint8_t ss)
+void SPI::chipSelect(uint8_t ss)
 {
 	ss ? PORT->BSRRL |= PIN : PORT->BSRRH |= PIN;
 }
+
 void SPI::start(uint8_t brr)
 {
 //	//SPIx->CR1 |= (br << 3) | SPI_CR1_DFF;

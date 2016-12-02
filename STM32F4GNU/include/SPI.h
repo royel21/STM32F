@@ -34,7 +34,7 @@ class SPI
 		void setCPHA(uint8_t cpha);
 		void start(uint8_t brControl = 0);
 		void softPin(GPIO_TypeDef *port, uint16_t pin);
-		void slaveSelect(uint8_t ss);
+		void chipSelect(uint8_t ss);
 		uint8_t send8Byte(uint8_t);
 		uint16_t send16Byte(uint16_t);
 		uint8_t receive8Byte();
