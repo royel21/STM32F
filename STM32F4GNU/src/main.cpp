@@ -51,10 +51,8 @@ int main(void)
 //	matrix.setDisplayON(ON);
 //	matrix.setScanDigit(8);
 //	matrix.setBrightness(15);
-
+	delayMillis(1000);
 	sendData(0x0A0F);
-	sendData(0x0B07);
-	sendData(0x0C01);
 	for (int i = 0; i < 8; i++)
 	{
 
@@ -63,6 +61,7 @@ int main(void)
 
 		sendData(0x0B07);
 		delayMillis(250);
+		sendData(0x0C01);
 		sendData(max2[i]);
 		//delayMicros(20);
 	}
@@ -73,6 +72,7 @@ int main(void)
 		//sendData(0x0A0F);
 		//sendData(0x0B07);
 		sendData(0x0B07);
+		sendData(0x0C01);
 		sendData(max[i]);
 		delayMillis(250);
 	}
