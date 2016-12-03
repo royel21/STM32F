@@ -45,8 +45,9 @@ void GPIO_Config(GPIO_TypeDef *port, const uint16_t pins, uint8_t mode, uint8_t 
 					port->AFR[pin >> 3] = temp_port;
 				}
 				// set GPIO PORT Mode Register
+        port->OTYPER &= ~(1 << pin);
 				port->OTYPER |= (oTyper << pin); // set GPIO PORT OUTPUT Type Register
-				port->OTYPER &= ~(pinMask << pin);
+
 
 				port->OSPEEDR &= ~(pinMask << pin * 2); //Clear pin config
 				port->OSPEEDR |= (speed << pin * 2);

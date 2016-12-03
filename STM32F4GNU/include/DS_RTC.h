@@ -31,8 +31,14 @@ class DS_RTC {
 		void setTime(uint8_t *);
 		void getTime(uint8_t *);
 
-		inline void set(uint8_t min,uint8_t date){ I2C1Comm.WriteToReg(rtc_addr,date,decToBCD(min)); }
-		inline uint8_t get(uint8_t time){ return bcdToDEC(I2C1Comm.ReadFrom(rtc_addr,time));}
+    inline void set(uint8_t min, uint8_t date)
+    {
+      I2C1Comm.WriteToReg(rtc_addr, date, decToBCD(min));
+    }
+    inline uint8_t get(uint8_t time)
+    {
+      return bcdToDEC(I2C1Comm.ReadFrom(rtc_addr, time));
+    }
 };
 
 #endif /* DS_RTC_H_ */

@@ -34,9 +34,9 @@ void LCD_I2C::Init()
 }
 void LCD_I2C::Write4Bits(uint8_t data)
 {
-	I2C1Comm.WriteTo(address, data | EnON | blackLightState);
+  I2C1Comm.WriteTo(address, data | EnON | blackLightState);
   delayMicros(1);
-	I2C1Comm.WriteTo(address, (data | blackLightState) & ~EnON);
+  I2C1Comm.WriteTo(address, (data | blackLightState) & ~EnON);
   delayMicros(40);
 }
 

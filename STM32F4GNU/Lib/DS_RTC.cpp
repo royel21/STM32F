@@ -24,12 +24,12 @@ uint8_t DS_RTC::decToBCD(uint8_t val)
 
 void DS_RTC::setTime(uint8_t *time)
 {
-	I2C1Comm.Start(rtc_addr, I2C_WR);
-	I2C1Comm.Write(0x00);
+  I2C1Comm.Start(rtc_addr, I2C_WR);
+  I2C1Comm.Write(0x00);
 	uint8_t size = 7;
 	while (size)
 	{
-		I2C1Comm.Write(decToBCD(*time));
+    I2C1Comm.Write(decToBCD(*time));
 		time++;
 		size--;
 	}
@@ -38,7 +38,7 @@ void DS_RTC::setTime(uint8_t *time)
 
 void DS_RTC::getTime(uint8_t *time)
 {
-	I2C1Comm.ReadMultiReg(rtc_addr, 0x00, time, 7);
+  I2C1Comm.ReadMultiReg(rtc_addr, 0x00, time, 7);
 	for(int i = 0; i < 7;i++)
 	{
 		time[i] = bcdToDEC(time[i]);

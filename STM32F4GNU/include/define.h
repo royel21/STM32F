@@ -8,6 +8,7 @@
 #ifndef MACROSPIN_HPP_
 #define MACROSPIN_HPP_
 #include "cmsis_device.h"
+
 #define USE_USART2
 #define USE_USART6
 #define NOP						   asm("nop")
@@ -17,8 +18,25 @@
 #define HEX						   ((uint8_t)0x10)
 #define LOW						   ((uint8_t)0x00)
 #define HIGH					   ((uint8_t)0x01)
-#define ON							HIGH
-#define OFF							LOW
+#define ON							  ((uint8_t)0x00)
+#define OFF							  ((uint8_t)0x01)
+
+#ifdef STM32F1
+#define MODE_IN                (uint8_t)0x00
+#define MODE_OUT_2MHZ          (uint8_t)0x02
+#define MODE_OUT_10MHZ         (uint8_t)0x01
+#define MODE_OUT_50MHZ         (uint8_t)0x03
+
+#define CNF_IN_ANG             (uint8_t)0x00
+#define CNF_IN_FLOAT           (uint8_t)0x40
+#define CNF_IN_PULL            (uint8_t)0x80
+
+#define CNF_OUT_PP             (uint8_t)0x00
+#define CNF_OUT_OD             (uint8_t)0x40
+#define CNF_OUT_AFPP           (uint8_t)0x80
+#define CNF_OUT_AFDD           (uint8_t)0xC0
+#endif
+#ifdef STM32F4
 #define TIM_CCMR1_OC1PWM1		((uint16_t)0x00000060)
 #define TIM_CCMR1_OC1PWM2		((uint16_t)0x00000070)
 #define TIM_CCMR1_OC2PWM1		((uint16_t)0x00006000)
@@ -28,8 +46,8 @@
 #define TIM_CCMR2_OC4PWM1		TIM_CCMR1_OC2PWM1
 #define TIM_CCMR2_OC4PWM2		TIM_CCMR1_OC2PWM2
 
-#define MODE_IN				    ((uint8_t)0x00)
-#define MODE_OUT			    ((uint8_t)0x01)
+#define MODE_IN				          ((uint8_t)0x00)
+#define MODE_OUT			          ((uint8_t)0x01)
 #define MODE_AF                 ((uint8_t)0x02)
 #define MODE_ANG                ((uint8_t)0x03)
 
@@ -136,5 +154,6 @@
 #define AF_TIM14         ((uint8_t)0x09)  /* TIM14 Alternate Function mapping */
 #define AF9_I2C2         ((uint8_t)0x09)  /* I2C2 Alternate Function mapping (Only for STM32F401xx/STM32F410xx/STM32F411xE/STM32F412xG Devices) */
 #define AF9_I2C3         ((uint8_t)0x09)  /* I2C3 Alternate Function mapping (Only for STM32F401xx/STM32F411xE/STM32F412xG Devices) */
+#endif
 
 #endif /* MACROSPIN_HPP_ */

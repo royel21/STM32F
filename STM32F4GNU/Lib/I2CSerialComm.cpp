@@ -281,4 +281,4 @@ void I2C1_EV_IRQHandler(void)
 		break;
 	}
 }
-I2CSerialComm I2C1Comm = I2CSerialComm(I2C1, P08 | P09);
+I2CSerialComm I2C1Comm(I2C1, P08 | P09);
