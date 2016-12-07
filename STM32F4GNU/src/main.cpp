@@ -1,11 +1,9 @@
-
 #include "SPI.h"
 #include "MAX7219.h"
 #include "Timer.h"
 #include "SerialHardware.h"
 #include "LCDI2C.h"
 #include "I2CSerialComm.h"
-
 
 SPI spi(SPI1, P05 | P06 | P07);
 const uint16_t max[] =
@@ -23,11 +21,11 @@ void sendData(uint16_t data)
 int main(void)
 {
 
-  //spi.setBidiMode(SPI_TRANSMIT);
-//  Serial2.Init(115200);
-//  spi.softPin(GPIOA, P04);
-//  spi.start(SPI_BRRDIV16);
-//
+//  spi.setBidiMode(SPI_TRANSMIT);
+  Serial2.Init(115200);
+  spi.softPin(GPIOA, P04);
+  spi.start(SPI_BRRDIV16);
+
 //  MAX7219 matrix(&spi);
 //	spi.slaveSelect(LOW);
 //	spi.send16Byte(0x0B07);
@@ -48,7 +46,7 @@ int main(void)
 //	spi.slaveSelect(HIGH);
 //
 //	delayMillis(100);
-
+//
 //	uint8_t data[] =
 //	{ 0, 0, 0, 0, 0, 0, 0, 0 };
 //	matrix.writeData(data);
@@ -56,7 +54,7 @@ int main(void)
 //	matrix.setScanDigit(8);
 //	matrix.setBrightness(15);
 //  delayMillis(1000);
-//  sendData(0x0A0F);
+
 //  for (int i = 0; i < 8; i++)
 //  {
 //
@@ -80,148 +78,130 @@ int main(void)
 //    sendData(max[i]);
 //    delayMillis(250);
 //  }
-  LCD_I2C lcd(0x27);
-  lcd.Init();
+  uint8_t bright = 8;
   while (1)
   {
-    lcd.print("hola Mundo");
-    delayMillis(100);
-//    if (Serial2.hasData())
-//    {
-//
-//      char ch = Serial2.readByte();
-//      switch (ch)
-//      {
-//        case 'a':
-//        {
-//          Serial2.print("ALLON:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x0F01);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case 'b':
-//        {
-//          Serial2.print("ALLOFF:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x0F00);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case 'c':
-//        {
-//          Serial2.print("BrightLow:");
-//          for (int i = 0; i < 8; i++)
-//          {
-//            spi.chipSelect(LOW);
-//            spi.send16Byte(max[i]);
-//            spi.chipSelect(HIGH);
-//            //delayMicros(500);
-//            Serial2.println("Data:", max[i], HEX);
-//          }
-//
-//          break;
-//        }
-//        case 'd':
-//        {
-//          Serial2.print("BrightHigh:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0xA0f);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case 'e':
-//        {
-//          Serial2.print("Scan8Digit:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x0B07);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case 'f':
-//        {
-//          Serial2.print("on:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x0C01);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//
-//        case '1':
-//        {
-//          Serial2.print("BrightLow:");
-//          for (int i = 0; i < 8; i++)
-//          {
-//            spi.chipSelect(LOW);
-//            spi.send16Byte(max2[i]);
-//            spi.chipSelect(HIGH);
-//            //delayMicros(500);
-//            Serial2.println("Data:", max[i], HEX);
-//          }
-//          break;
-//        }
-//        case '2':
-//        {
-//          Serial2.print("Row2:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x02FF);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case '3':
-//        {
-//          Serial2.print("Row3:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x03FF);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case '4':
-//        {
-//          Serial2.print("Row4:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x04FF);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case '5':
-//        {
-//          Serial2.print("Row5:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x05FF);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case '6':
-//        {
-//          Serial2.print("Row6:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x06FF);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case '7':
-//        {
-//          Serial2.print("Row7:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x07FF);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//        case '8':
-//        {
-//          Serial2.print("Row8:");
-//          spi.chipSelect(LOW);
-//          spi.send16Byte(0x08FF);
-//          spi.chipSelect(HIGH);
-//          break;
-//        }
-//
-//      }
-//      Serial2.WriteByte(ch);
-//     Serial2.WriteByte('\n');
-//
-//    }
+
+    if (Serial2.hasData())
+    {
+
+      char ch = Serial2.readByte();
+      switch (ch)
+      {
+        case 'a':
+        {
+          Serial2.print("ALLON:");
+          sendData(0x0F01);
+          break;
+        }
+        case 'b':
+        {
+          Serial2.print("ALLOFF:");
+          sendData(0x0F00);
+          break;
+        }
+        case 'c':
+        {
+          Serial2.print("BrightLow:");
+          for (int i = 0; i < 8; i++)
+          {
+            sendData(max[i]);
+          }
+
+          break;
+        }
+        case 'd':
+        {
+          Serial2.print("BrightHigh:");
+          sendData(0xA00 | bright);
+          break;
+        }
+        case 'e':
+        {
+          Serial2.print("Scan8Digit:");
+          sendData(0x0B07);
+          break;
+        }
+        case 'f':
+        {
+          Serial2.print("on:");
+          sendData(0x0C01);
+          break;
+        }
+
+        case '0':
+        {
+          Serial2.print("BrightLow:");
+          for (int i = 0; i < 8; i++)
+          {
+            sendData(max2[i]);
+          }
+          break;
+        }
+        case '1':
+        {
+          sendData(0x01018);
+          break;
+        }
+        case '2':
+        {
+          sendData(0x0203C);
+          break;
+        }
+        case '3':
+        {
+          sendData(0x037E);
+          break;
+        }
+        case '4':
+        {
+          sendData(0x047E);
+          break;
+        }
+        case '5':
+        {
+          sendData(0x053C);
+          break;
+        }
+        case '6':
+        {
+          sendData(0x0618);
+          break;
+        }
+        case '7':
+        {
+          Serial2.print("Row7:");
+          sendData(0x07FF);
+          break;
+        }
+        case '8':
+        {
+          Serial2.print("Row8:");
+          sendData(0x08FF);
+          break;
+        }
+        case '+':
+        {
+          if (bright < 0xF)
+          {
+            sendData(0x0A00 | ++bright);
+          }
+          break;
+        }
+        case '-':
+        {
+          if (bright > 0x00)
+          {
+            sendData(0x0A00 | --bright);
+          }
+
+          break;
+        }
+      }
+      Serial2.WriteByte(ch);
+      Serial2.WriteByte('\n');
+
+    }
   }
   return 0;
 }

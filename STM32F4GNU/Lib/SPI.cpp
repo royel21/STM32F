@@ -6,6 +6,7 @@
  */
 
 #include "SPI.h"
+#include "SerialHardware.h"
 
 SPI::SPI(SPI_TypeDef *spi, uint16_t pins)
 {
@@ -19,7 +20,7 @@ SPI::SPI(SPI_TypeDef *spi, uint16_t pins)
 	{
 		RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
 	}
-	GPIO_Config(GPIOA, pins, MODE_AF, PULL_DOWN, OTYPER_PP, SPEED_50MHz, AF_SPI);
+  GPIO_Config(GPIOA, pins, MODE_AF, PULL_DOWN, OTYPER_PP, SPEED_50MHz, AF_SPI);
 
 }
 
@@ -64,7 +65,7 @@ void SPI::start(uint8_t brr)
 
 uint8_t SPI::send8Byte(uint8_t Byte)
 {
-	while ((SPIx->SR & SPI_SR_TXE) == RESET)
+  while (!(SPIx->SR & SPI_SR_TXE))
 		;
 	SPIx->DR = Byte;
 	while ((SPIx->SR & SPI_SR_RXNE) == RESET)
@@ -74,10 +75,12 @@ uint8_t SPI::send8Byte(uint8_t Byte)
 
 uint16_t SPI::send16Byte(uint16_t word)
 {
-	while ((SPIx->SR & SPI_SR_TXE) == RESET)
-		;
-	SPIx->DR = word;
-	while ((SPIx->SR & SPI_SR_RXNE) == RESET)
-		;
-	return SPIx->DR & 0xFFFF;
+
+  while (!(SPIx->SR & SPI_SR_TXE))
+    ;
+  SPIx->DR = word;
+  word = SPIx->DR & 0xFFFF;
+  while ((SPIx->SR & SPI_SR_RXNE) == RESET)
+    ;
+  return word;
 }
